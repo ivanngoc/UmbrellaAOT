@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "Umbrella.Client": {
+      "commandName": "Project",
+      "commandLineArgs": "C:\\Users\\ivan\\Documents\\assessment\\Umbrella\\tests\\Umbrella.IntegrationTests\\configs\\config.json"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker"
+    }
+  }
+}

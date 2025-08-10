@@ -1,0 +1,73 @@
+stages:
+  - build
+  - test
+  - publish
+  - integration-test
+  - deploy
+
+build-job:
+  stage: build
+  tags:
+    - build
+  script:
+    - echo "Build..."
+
+unit-test-job:
+  stage: test
+  tags:
+    - test
+  script:
+    - echo "Running unit tests... This will take about 60 seconds."
+    - echo "Code coverage is 90%"
+
+lint-test-job:
+  stage: test
+  tags:
+    - test
+  script:
+    - echo "Linting code... This will take about 10 seconds."
+    - echo "No lint issues found."
+
+publish-job:
+  stage: publish
+  tags:
+    - publish
+  image: yoojie/dotnetsdk:9.0-aot
+  before_script: |
+    echo "=========== before_script build-job start ============"
+    # apt-get update && apt-get install -y clang gcc build-essential
+    # dotnet restore
+    echo "=========== before_script build-job end ============"
+  script: |
+    echo "======= BEGIN ========="
+    echo "$DOCKER_TOKEN $DOCKER_USERNAME"
+    podman login docker.io --username=$DOCKER_USERNAME --password=$DOCKER_TOKEN
+    dotnet publish ./microservices/Umbrella.Server/Umbrella.Server.csproj -p:PublishProfile=FolderProfile
+    ls -la ./microservices/Umbrella.Server/bin/publish/
+    echo "Build image..."
+    podman build -f ./microservices/Umbrella.Server/Dockerfile -t docker.io/yoojie/umbrella-server:latest ./microservices/Umbrella.Server
+    echo "Push image..."
+    podman push docker.io/yoojie/umbrella-server:latest
+    echo "======= END ==========="
+
+deploy-job:
+  stage: deploy
+  tags:
+    - deploy
+  environment: production
+  script:
+    - echo "Deploying application..."
+    - echo "Application successfully deployed."
+
+integration-test-job:
+  stage: integration-test
+  tags:
+    - test
+  image: yoojie/dotnet-integration-test:9.0
+  environment: development
+  before_script: |
+    # dotnet restore ./tests/Umbrella.IntegrationTests/
+  script: |
+    echo "integration test start..."
+    dotnet test ./tests/Umbrella.IntegrationTests/
+    echo "integration test ended"

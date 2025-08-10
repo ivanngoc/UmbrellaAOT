@@ -1,0 +1,7 @@
+{
+  "InputPath": "var/data.txt",
+  "ServerHost": "127.0.0.1",
+  "ServerPort": 5555,
+  "TlsEnabled": true,
+  "TlsValidateCert": false
+}
